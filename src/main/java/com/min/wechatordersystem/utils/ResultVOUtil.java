@@ -9,6 +9,9 @@ public class ResultVOUtil {
     private ResultVOUtil() {
     }
 
+    /**
+     * 封装响应返回结果 成功
+     */
     public static <T> ResultVO<T> SUCCESS(ArrayList<T> list) {
         ResultVO<T> objectResultVO = new ResultVO<>();
         objectResultVO.setCode(0);
