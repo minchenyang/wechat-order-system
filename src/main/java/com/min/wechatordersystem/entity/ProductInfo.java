@@ -28,7 +28,7 @@ public class ProductInfo {
     private BigDecimal productPrice;
     //库存
     @Column(name = "product_stock")
-    private String productStock;
+    private Integer productStock;
     //描述
     @Column(name = "product_description")
     private String productDescription;

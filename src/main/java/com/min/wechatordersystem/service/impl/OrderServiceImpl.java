@@ -5,6 +5,7 @@ import com.min.wechatordersystem.dao.OrderMasterDao;
 import com.min.wechatordersystem.entity.OrderDetail;
 import com.min.wechatordersystem.entity.OrderMaster;
 import com.min.wechatordersystem.entity.ProductInfo;
+import com.min.wechatordersystem.entity.dto.CartDTO;
 import com.min.wechatordersystem.entity.enums.ResultEnum;
 import com.min.wechatordersystem.entity.vo.OrderVO;
 import com.min.wechatordersystem.exception.CustomException;
@@ -13,10 +14,17 @@ import com.min.wechatordersystem.service.ProductService;
 import com.min.wechatordersystem.utils.KeyUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
+@Service
 public class OrderServiceImpl implements OrderService {
 
     @Autowired
@@ -52,7 +60,45 @@ public class OrderServiceImpl implements OrderService {
         orderMaster.setOrderAmount(orderAmount);
         BeanUtils.copyProperties(orderVo, orderMaster);
         orderMasterDao.save(orderMaster);
+        //扣除库存
+        List<CartDTO> collect = orderVo.getOrderDetailList().stream().map(e -> new CartDTO(e.getProductId(), e.getProductQuantity())).collect(Collectors.toList());
+        productService.decreaseStork(collect);
+        return orderVo;
+    }
 
+    @Override
+    public OrderVO findOne(String orderId) {
+        Optional<OrderMaster> optional = orderMasterDao.findById(orderId);
+        OrderVO orderVO = new OrderVO();
+        OrderMaster orderMaster = optional.get();
+        List<OrderDetail> orderDetailList = orderDetailDao.findByOrderId(orderId);
+        orderVO.setOrderDetailList(orderDetailList);
+        BeanUtils.copyProperties(orderMaster, orderVO);
+        orderVO.setName(orderMaster.getBuyerName());
+        orderVO.setAddress(orderMaster.getBuyerAddress());
+        orderVO.setPhone(orderMaster.getBuyerPhone());
+        orderVO.setOpenid(orderMaster.getBuyerOpenid());
+        return orderVO;
+    }
+
+    @Override
+    public Page<OrderVO> findList(String buyerOpenid, Pageable pageable) {
+
+        return null;
+    }
+
+    @Override
+    public OrderVO cancel(OrderVO orderVO) {
+        return null;
+    }
+
+    @Override
+    public OrderVO finish(OrderVO orderVO) {
+        return null;
+    }
+
+    @Override
+    public OrderVO paid(OrderVO orderVO) {
         return null;
     }
 }
